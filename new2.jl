@@ -5,7 +5,7 @@ end
 using DifferentialEquations; 
 using Jurvis;       
 using PyPlot;
-using LinearAlgebra;
+using LinearAlgebra
 
 # dev https://github.com/kutsjuice/Jurvis.jl
 function reduce_order(m_M, m_C, m_K)
