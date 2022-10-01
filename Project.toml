@@ -1,5 +1,6 @@
 [deps]
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+Hilbert = "5befdd30-5572-5129-8422-0c92d957d47a"
 Jurvis = "d875d3bc-0775-42f2-bc5f-448efffc5c3f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"

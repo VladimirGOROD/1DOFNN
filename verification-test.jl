@@ -2,7 +2,6 @@ using Pkg;
 if lowercase(Base.active_project()) != lowercase(@__DIR__()*"\\Project.toml")
     Pkg.activate(".");
 end
-using DifferentialEquations; 
 using Jurvis;       
 using PyPlot;
 using LinearAlgebra
@@ -14,55 +13,53 @@ damp1(t) = 0.002 *(2- (t/30)^2);
 ζ = damp1.(t);
 damp2(t) = 0.008;
 ζ2 = damp2.(t);
-damp3(t)=(exp.((-0.7*t))+50);
-g = damp3.(t);
-damp4(t)=3*exp((-t*1.5)-p[4])+87;
-g2 = damp4.(t);
-plot(t,g2);
+freq1(t)=(exp.((-0.7*t))+50);
+g = freq1.(t);
+freq2(t)=3*exp((-t*1.5)-p[4])+87;
+g2 = freq2.(t);
+# plot(t,g2);
 ω1 = 2*π*g;
 ω2 = 2*π*g2;
-A1 = p[6]*exp.(-ζ.*ω1.*t)
-θ1 = A1.*sin.(ω1.*t)
-θ2=p[7]*sin.(ω2.*t.+π/8).*e.^(-ζ2.*ω2.*t)
-θ=θ1+θ2
-plot(t,A1)
+A1 = p[6]*exp.(-ζ.*ω1.*t);
+A2 =p[7].*e.^(-ζ2.*ω2.*t);
+θ1 = A1.*sin.(ω1.*t);
+θ2=A2.*sin.(ω2.*t.+π/8);
+θ=θ1+θ2;
 
-L=size(t)
+##
+
 SSA_win = 2000;
-decomposed_data = decomposeSSA(θ, 10, SSA_win);
+signal = MeasuredData("test data", t, hcat(θ, θ1, θ2), "time", ["test signal", "mode1", "mode2"], size(θ,1), 3, ["", "", ""])
+decomposed_data = decomposeSSA(signal,1, 10, SSA_win);
+plotall(spectrumall(decomposed_data)); yscale("log"); legend();xlim([0,200])
+plotall(decomposed_data)
 # figure();
 # plot(decomposed_data[:,])
-Data=MeasuredData(50001, 0);
-begin
-    for i=1:10
-    add_data!(Data,decomposed_data[:,i]); 
-    end 
-end
-Data.xdata=t;
-sp_modes = spectrumall(Data);
-plotchannel(sp_modes;ch=1)
-plot(sp_modes.ydata[:,1])
+# Data=MeasuredData(50001, 0);
+# begin
+    # for i=1:10
+    # add_data!(Data,decomposed_data[:,i]); 
+    # end 
+# end
+# Data.xdata=t;
+#sp_modes = spectrumall(Data);
+#plotchannel(sp_modes;ch=1)
+#plot(sp_modes.ydata[:,1])
 # plotall(sp_modes)
 # plot(sp_modes.ydata[:,1])
-  yscale("log")
+#  yscale("log")
 # plot(Data.ydata[:,3])
 
 
-groups = [[2,5,6,9],
-            [3,4,7,8,10]
+groups = [[2,3,6,7,10, 11],
+            [4,5,8,9]
             ];
 
-grsp_modes = groupmodes(sp_modes, groups);
-plot(sp_modes.ydata[:,10])
-begin
-    figure()
-    plotall(grsp_modes)
-    # plot(sp_modes.ydata[:,1])
-    yscale("log")
-    title("");
-end
+grouped_modes = groupmodes(decomposed_data, groups)
 
-gr_modes = groupmodes(Data, groups);#содержит исходный сигнал и две первые сгруп моды
+
+gr_modes = copydata(grouped_modes, [1,2,3])
+# gr_modes = groupmodes(Data, groups);#содержит исходный сигнал и две первые сгруп моды
 mode1 = copydata(gr_modes, [2]);
 #  plot(mode1.ydata[:,1]);
 env1=envelope(mode1.ydata[:,1]);
@@ -73,10 +70,10 @@ add_data!(mode1, phase1; ydata_name = "inst phase моды 1"); #канал 3
 
 inst_freq1 = findiff(mode1.ydata[:,3], t[2] - t[1]; order = 4) / (2*π);
 freq_modes1 = decomposeSSA(inst_freq1, 10,1000);
+plot(inst_freq1);plot(freq_modes1[:,1]); plot(g)
 ζ1 = 100*instdamping(mode1.ydata[:,2], freq_modes1[:,1]);
 add_data!(mode1, ζ1; ydata_name = "Коэффициент демпфирования первой моды"); #канал 4
-plot(t,ζ1)
-plot(freq_modes1[:,1])
+
 begin
     fig, ax = plt.subplots(1,2, figsize = [12,6]);
     # ax[1].sharex(ax[2]);
@@ -91,12 +88,43 @@ begin
     ax[2].plot(mode1.ydata[:,2],mode1.ydata[:,4]);
     ax[2].set_xlabel("Амплитуда, [м/с]");
     ax[2].set_ylabel("Демпфирование, [%]");
-      ax[2].set_ylim([0.0038,0.004]);
+      # ax[2].set_ylim([0.0038,0.004]);
     # ax[2].set_xlim([0.5,5.2]);
     ax[2].set_title("Демпфирование-амплитуда");
 end
-plotchannel(mode1;ch=2)
+
+mode2 = copydata(gr_modes, [3]);
+
+env2=envelope(mode2.ydata[:,1]);
+env_modes2 = decomposeSSA(env2, 10, 1000);
+add_data!(mode2, env_modes2[:,1]; ydata_name = "Огибающая первой моды"); #канал 2
+phase2 = instphase(mode2.ydata[:,1]);
+add_data!(mode2, phase2; ydata_name = "inst phase моды 1"); #канал 3
+
+inst_freq2 = findiff(mode2.ydata[:,3], t[2] - t[1]; order = 4) / (2*π);
+freq_modes2 = decomposeSSA(inst_freq2, 10,1000);
+ζ2_2 = 100*instdamping(mode2.ydata[:,2], freq_modes2[:,1]);
+add_data!(mode2, ζ2_2; ydata_name = "Коэффициент демпфирования первой моды"); #канал 4
+##
+begin
+
 plot(t,A1)
-plot(ζ1)
+plotchannel(mode1;ch=2)
 figure()
-plot(,g)
+plot(t,A2)
+plotchannel(mode2;ch=2)
+
+figure()
+plot(t,ζ)
+plotchannel(mode1;ch=4)
+ylim([0.0038,0.004]);
+figure()
+plot(t,ζ2)
+plotchannel(mode2;ch=4)
+end
+
+
+figure()
+plot(t,ζ)
+plotchannel(mode1;ch=4)
+ylim([0.0038,0.004]);
