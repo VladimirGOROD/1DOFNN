@@ -1,6 +1,6 @@
 using Pkg;
 if lowercase(Base.active_project()) != lowercase(@__DIR__()*"\\Project.toml")
-    Pkg.activate(".");
+    Pkg.activate("."); Pkg.instantiate()
 end
 using DifferentialEquations; 
 using Jurvis;       
