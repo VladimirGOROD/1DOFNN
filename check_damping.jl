@@ -60,9 +60,9 @@ function calcfreq(env::AbstractVector{<:Number}, time::AbstractVector{<:Number},
 
 B=calcfreq(env,t,dt) #произведение ω и ζ
 typeof(B)
-Da=B/freq;
+Da=B./freq;
 
-#  plot(damp)
-# plot(ζ1)
+plot(Da)
+plot(ζ1)
 # plot(damp)
 # plot(ω1)
