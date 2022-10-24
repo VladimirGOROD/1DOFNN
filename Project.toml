@@ -1,5 +1,4 @@
 [deps]
-BasicInterpolators = "26cce99e-4866-4b6d-ab74-862489e035e0"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 Hilbert = "5befdd30-5572-5129-8422-0c92d957d47a"
 Jurvis = "d875d3bc-0775-42f2-bc5f-448efffc5c3f"

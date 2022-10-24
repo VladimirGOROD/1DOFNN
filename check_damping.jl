@@ -5,6 +5,7 @@ end
 using Jurvis;       
 using PyPlot;
 using LinearAlgebra
+using Peaks;
 dt = 1e-4;
 t = (0.0:dt:5.0); # time frames
 
@@ -14,7 +15,7 @@ damp1(t) = 0.002 *(2- (t/30)^2);
 freq1(t)=(exp.((-0.7*t))+50);
 f1 = freq1.(t);
 
-ω1 = 2*π*g;
+ω1 = 2*π*f1;
 ϕ1 = cumsum(ω1) * dt;
 
 A1 = 100*exp.(-ζ1 .* ω1 .* t);
@@ -29,12 +30,12 @@ plot(A1)
 calc_env = envelope(signal)
 plot(calc_env)
 
-# using Peaks;
+
 # using BasicInterpolators;
 max_pks, max_vals = findmaxima(signal)
 min_pks, min_vals = findminima(signal)
 plot(t, signal); plot(t, A1)
-
+plot()
 env = decomposeSSA(calc_env, 10, 1000)[:,1];
 plot(t, env)
 phase = instphase(signal)
