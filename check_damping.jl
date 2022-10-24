@@ -23,29 +23,46 @@ A1 = 100*exp.(-ζ1 .* ω1 .* t);
 signal = A1.*sin.(ϕ1);
 
 
-plot(signal);
-plot(A1)
+# plot(signal);
+# plot(A1)
 
 
 calc_env = envelope(signal)
-plot(calc_env)
+# plot(calc_env)
 
 
 # using BasicInterpolators;
 max_pks, max_vals = findmaxima(signal)
 min_pks, min_vals = findminima(signal)
-plot(t, signal); plot(t, A1)
-plot()
+# plot(t, signal); plot(t, A1)
+# plot()
 env = decomposeSSA(calc_env, 10, 1000)[:,1];
-plot(t, env)
+# plot(t, env)
 phase = instphase(signal)
 # phase = decomposeSSA(instphase(signal), 10, 1000)[:,1];
-plot(phase)
+# plot(phase)
 
 
-freq = decomposeSSA(findiff(phase, dt; order = 4), 10,1000)[:,1]
+freq = decomposeSSA(findiff(phase, dt; order = 4), 10,1000)[:,1];
+typeof(freq)
 
-damp = instdamping(A1, f1)
-plot(ζ1)
-plot(damp ./ ζ1)
-plot(ω1)
+function calcfreq(env::AbstractVector{<:Number}, time::AbstractVector{<:Number}, step::Number)
+    Ȧ = findiff(env, step; order = 2);
+    g = - Ȧ ./ env;
+    βₐₚ = Vector{Float64}(undef, length(time));
+    for i in 2:length(time);
+        βₐₚ[i] = (step * time[i] / ( step + time[i])) * ( βₐₚ[i-1] / step + g[i] / time[i]);
+    end
+    return βₐₚ
+ end
+ 
+
+
+B=calcfreq(env,t,dt) #произведение ω и ζ
+typeof(B)
+Da=B/freq;
+
+#  plot(damp)
+# plot(ζ1)
+# plot(damp)
+# plot(ω1)
