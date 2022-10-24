@@ -1,7 +1,7 @@
 using PyPlot;
-dt = 0.001;
+dt = 0.001; #step
 T = 10;
-t = 0: dt: T;
+t = 0: dt: T;#time
 
 ζ = 0.01;
 
@@ -19,25 +19,26 @@ plot(t, ω)
 β = ζ .* ω;
 
 A₀= 5;
-A = A₀*exp.(-β.*t);
+A = A₀*exp.(-β.*t);#огибающая
 
-x = A.*sin.(ω.*t)
+x = A.*sin.(ω.*t)# сигнал
 
 plot(t, x)
 plot(t, A)
 
-using Jurvis
-Ȧ = findiff(A, dt; order = 2);
-g = - Ȧ ./ A
 
 
-βₐₚ = Vector{Float64}(undef, length(t));
 
-βₐₚ[1] =  - Ȧ[1] / A[1];
 
-for i in 2:length(t)
-    βₐₚ[i] = (dt * t[i] / ( dt + t[i])) * ( βₐₚ[i-1] / dt + g[i] / t[i]);
-end
+ function calcfreq(env::AbstractVector{<:Number}, time::AbstractVector{<:Number}, step::Number)
+    Ȧ = findiff(env, step; order = 2);
+    g = - Ȧ ./ env;
+    βₐₚ = Vector{Float64}(undef, length(time));
+    for i in 2:length(time);
+        βₐₚ[i] = (step * time[i] / ( step + time[i])) * ( βₐₚ[i-1] / step + g[i] / time[i]);
+    end
+    return βₐₚ
+ end
 
-plot(t, β); plot(t, βₐₚ)
-plot(t, βₐₚ)
+ с=calcfreq(A,t,dt);
+)
