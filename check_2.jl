@@ -1,3 +1,4 @@
+using Jurvis;
 using PyPlot;
 dt = 0.001; #step
 T = 10;
@@ -30,15 +31,18 @@ plot(t, A)
 
 
 
- function calcfreq(env::AbstractVector{<:Number}, time::AbstractVector{<:Number}, step::Number)
+function calcdecaycoeff(env::AbstractVector{<:Number}, time::AbstractVector{<:Number}, step::Number)
     Ȧ = findiff(env, step; order = 2);
     g = - Ȧ ./ env;
     βₐₚ = Vector{Float64}(undef, length(time));
+    βₐₚ[1] =  - Ȧ[1] / A[1];
     for i in 2:length(time);
         βₐₚ[i] = (step * time[i] / ( step + time[i])) * ( βₐₚ[i-1] / step + g[i] / time[i]);
     end
     return βₐₚ
- end
+end
 
- с=calcfreq(A,t,dt);
-)
+β_calc = calcdecaycoeff(A,t,dt);
+
+plot(t, β_calc)
+plot(t, β)
